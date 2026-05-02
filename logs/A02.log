@@ -1,0 +1,15 @@
+Connecting to ATC...
+Established connection to ATC!
+Please type the tail number of your aircraft: 
+Whats the fuel consumption per minute?
+Whats the total fuel?
+Your aircraft has been registered!
+To manuver the aircraft type:
+L for landing
+T for takeoff
+Take clearence recieved from ATC
+Takeoff started! Esitmated time: 3 sec
+Departure was successfull! Updating ATC!
+Exception in thread "main" java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1690)
+	at org.demos.aircraft.AircraftNode.main(AircraftNode.java:53)

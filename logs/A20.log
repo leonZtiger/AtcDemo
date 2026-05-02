@@ -1,0 +1,76 @@
+Connecting to ATC...
+Established connection to ATC!
+Please type the tail number of your aircraft: 
+Whats the fuel consumption per minute?
+Whats the total fuel?
+Your aircraft has been registered!
+To manuver the aircraft type:
+L for landing
+T for takeoff
+Fuel left: 999.7
+Fuel left: 999.68335
+Fuel left: 999.6667
+Fuel left: 999.65
+Fuel left: 999.63336
+Fuel left: 999.61664
+Fuel left: 999.6
+Fuel left: 999.5833
+Fuel left: 999.56665
+Fuel left: 999.55
+Fuel left: 999.5333
+Fuel left: 999.51666
+Fuel left: 999.5
+Fuel left: 999.48334
+Fuel left: 999.4667
+Fuel left: 999.45
+Fuel left: 999.43335
+Fuel left: 999.4167
+Fuel left: 999.4
+Fuel left: 999.38336
+Fuel left: 999.36664
+Fuel left: 999.35
+Fuel left: 999.3333
+Fuel left: 999.31665
+Fuel left: 999.3
+Fuel left: 999.2833
+Fuel left: 999.26666
+Fuel left: 999.25
+Fuel left: 999.23334
+Fuel left: 999.2167
+Fuel left: 999.2
+Fuel left: 999.18335
+Fuel left: 999.1667
+Fuel left: 999.15
+Fuel left: 999.13336
+Fuel left: 999.11664
+Fuel left: 999.1
+Fuel left: 999.0833
+Fuel left: 999.06665
+Fuel left: 999.05
+Fuel left: 999.0333
+Fuel left: 999.01666
+Fuel left: 999.0
+Fuel left: 998.98334
+Fuel left: 998.9667
+Fuel left: 998.95
+Fuel left: 998.93335
+Fuel left: 998.9167
+Fuel left: 998.9
+Fuel left: 998.88336
+Fuel left: 998.86664
+Fuel left: 998.85
+Fuel left: 998.8333
+Fuel left: 998.81665
+Fuel left: 998.8
+Fuel left: 998.7833
+Fuel left: 998.76666
+Fuel left: 998.75
+Fuel left: 998.73334
+Fuel left: 998.7167
+Fuel left: 998.7
+Landing clearence recieved from ATC
+Landing started! Esitmated time: 22 sec
+Landing was successfull! Aircraft clear for vacating
+Exception in thread "main" java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1690)
+	at org.demos.aircraft.AircraftNode.main(AircraftNode.java:53)

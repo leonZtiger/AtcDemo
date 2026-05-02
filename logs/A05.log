@@ -1,0 +1,32 @@
+Connecting to ATC...
+Established connection to ATC!
+Please type the tail number of your aircraft: 
+Whats the fuel consumption per minute?
+Whats the total fuel?
+Your aircraft has been registered!
+To manuver the aircraft type:
+L for landing
+T for takeoff
+Fuel left: 999.95
+Fuel left: 999.93335
+Fuel left: 999.9167
+Fuel left: 999.9
+Fuel left: 999.88336
+Fuel left: 999.86664
+Fuel left: 999.85
+Fuel left: 999.8333
+Fuel left: 999.81665
+Fuel left: 999.8
+Fuel left: 999.7833
+Fuel left: 999.76666
+Fuel left: 999.75
+Fuel left: 999.73334
+Fuel left: 999.7167
+Fuel left: 999.7
+Fuel left: 999.68335
+Landing clearence recieved from ATC
+Landing started! Esitmated time: 34 sec
+Landing was successfull! Aircraft clear for vacating
+Exception in thread "main" java.util.NoSuchElementException: No line found
+	at java.base/java.util.Scanner.nextLine(Scanner.java:1690)
+	at org.demos.aircraft.AircraftNode.main(AircraftNode.java:53)
