@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.demos.atc.AtcRemote;
 import org.demos.atc.Request;
@@ -15,7 +16,8 @@ public class Aircraft extends UnicastRemoteObject implements AircraftRemote {
     private float consumption;
     private AtcRemote atc;
     private Instant flightStart;
-    private boolean cleared;
+    private volatile boolean cleared;
+    private final AtomicBoolean holdingPatternActive;
 
     public Aircraft(String tailNumber, float fuel, float consumption, AtcRemote atc) throws RemoteException {
         super();
@@ -25,6 +27,7 @@ public class Aircraft extends UnicastRemoteObject implements AircraftRemote {
         this.flightStart = Instant.now();
         this.atc = atc;
         this.cleared = false;
+        this.holdingPatternActive = new AtomicBoolean(false);
     }
 
     @Override
@@ -33,8 +36,8 @@ public class Aircraft extends UnicastRemoteObject implements AircraftRemote {
 
         cleared = true;
 
-        // Perform landing
-        // New thread to not block the RPC
+        // Perform the landing.
+        // Use a new thread so the RPC is not blocked.
         new Thread(() -> {
             try {
                 int landingTime = (int) (60000.0 * Math.random());
@@ -66,43 +69,50 @@ public class Aircraft extends UnicastRemoteObject implements AircraftRemote {
     }
 
     private void EnterHoldingPattern() {
+        if (!holdingPatternActive.compareAndSet(false, true)) {
+            System.out.println("Holding pattern already active for " + tailNumber);
+            return;
+        }
 
         new Thread(() -> {
+            try {
+                boolean declared = false;
 
-            boolean declared = false;
+                while (!cleared) {
 
-            while (!cleared) {
-
-                float fuel = 0;
-
-                try {
-                    fuel = GetFuelLeft();
-                } catch (Exception e) {
-                }
-
-                // EMEGERNCY!!!!
-                if (fuel < 100 && !declared) {
+                    float fuel = 0;
 
                     try {
-                        atc.HandleRequest(new AircraftRequest(this, Request.LANDING), true);
+                        fuel = GetFuelLeft();
                     } catch (Exception e) {
-                        System.err.println(e.getMessage());
                     }
 
-                    declared = true;
-                }
+                    // Emergency!
+                    if (fuel < 100 && !declared) {
 
-                System.err.println("Fuel left: " + fuel);
+                        try {
+                            atc.HandleRequest(new AircraftRequest(this, Request.LANDING), true);
+                        } catch (Exception e) {
+                            System.err.println(e.getMessage());
+                        }
 
-                if (fuel == 0) {
-                    System.err.println("Grab tight we are crashing!");
-                    return;
-                }
+                        declared = true;
+                    }
 
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception e) {
+                    System.err.println("Fuel left: " + fuel);
+
+                    if (fuel == 0) {
+                        System.err.println("Grab tight we are crashing!");
+                        return;
+                    }
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception e) {
+                    }
                 }
+            } finally {
+                holdingPatternActive.set(false);
             }
         }).start();
     }
@@ -111,8 +121,8 @@ public class Aircraft extends UnicastRemoteObject implements AircraftRemote {
     public void ReceiveTakeoffClearence() throws RemoteException {
         System.out.println("Take clearence recieved from ATC");
 
-        // Perform departure
-        // New thread to not block the RPC
+        // Perform the departure.
+        // Use a new thread so the RPC is not blocked.
         new Thread(() -> {
             try {
                 int takeoffTime = (int) (20000.0 * Math.random());

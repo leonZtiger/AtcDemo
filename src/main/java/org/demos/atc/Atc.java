@@ -8,17 +8,32 @@ import java.util.Map;
 import org.demos.aircraft.AircraftRemote;
 import org.demos.aircraft.AircraftRequest;
 
+/**
+ * This class represents the ATC specified in the seminar document.
+ * The ATC receives messages through the HandleRequest method and then performs
+ * the necessary logic to coordinate the system.
+ * 
+ */
 public class Atc extends UnicastRemoteObject implements AtcRemote {
 
+    // This is the normal queue for non-emergency aircraft.
     private final LinkedHashMap<String, AircraftRequest> normalQueue;
+    // This is the emergency queue that all aircraft declaring an emergency are
+    // added to.
     private final LinkedHashMap<String, AircraftRequest> emergencyQueue;
 
-    // Used only for printing the table
+    // Used only for printing the table of all aircraft.
     private final LinkedHashMap<String, AircraftRemote> knownAircraft;
     private final LinkedHashMap<String, String> aircraftStatus;
 
     private final Runway runway;
 
+    /**
+     * Initializes the object and also creates a separate thread for printing the
+     * queues.
+     * 
+     * @throws RemoteException
+     */
     public Atc() throws RemoteException {
         super();
 
@@ -29,7 +44,7 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
         knownAircraft = new LinkedHashMap<>();
         aircraftStatus = new LinkedHashMap<>();
 
-        // Start status thread
+        // Thread for printing the queue.
         new Thread(() -> {
             while (true) {
                 PrintTable();
@@ -39,16 +54,18 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
                 } catch (Exception e) {
                 }
             }
-        }
-        ).start();
+        }).start();
     }
 
+    /**
+     * The main message handler. This controls the logic flow.
+     */
     @Override
     public synchronized void HandleRequest(AircraftRequest request, boolean emergency) throws RemoteException {
 
         String tailNumber = request.GetAircraft().GetTailNumber();
 
-        // Register aircraft so it can be shown in the table
+        // Register the aircraft so it can be shown in the table.
         knownAircraft.put(tailNumber, request.GetAircraft());
 
         if (request.GetRequest() == Request.VACATED
@@ -57,14 +74,15 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
             HandleVacatedOrDeparture(request.GetAircraft(), request.GetRequest());
 
         } else if (emergency) {
-            // Remove if aircraft had normal requests before, no duplicates wanted!
+            // Remove any previous normal request to avoid duplicates.
             normalQueue.remove(tailNumber);
 
             emergencyQueue.put(tailNumber, request);
             aircraftStatus.put(tailNumber, "EMERGENCY HOLDING");
 
         } else {
-            // Remove if aircraft had emergency requests before, no duplicates wanted! This will probably never happen?
+            // Remove any previous emergency request to avoid duplicates.
+            // This will probably never happen.
             emergencyQueue.remove(tailNumber);
 
             normalQueue.put(tailNumber, request);
@@ -79,12 +97,25 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
         WorkOnQueue();
     }
 
+    /**
+     * An aircraft that has departed or vacated will be the most recent aircraft
+     * on the runway.
+     * Therefore, this method ensures that the runway is cleared.
+     * 
+     * @param aircraft    The aircraft that has vacated or departed
+     * @param requestType The type of request. It is only needed for printing in the
+     *                    status table.
+     * @throws RemoteException
+     */
     private void HandleVacatedOrDeparture(AircraftRemote aircraft, Request requestType) throws RemoteException {
 
+        // Ensure the aircraft being compared is not null.
         if (runway.GetCurrentAircraft() == null) {
             return;
         }
 
+        // Ensure that the aircraft that sent this request is the one currently
+        // occupying the runway.
         if (runway.GetCurrentAircraft().GetTailNumber().equals(aircraft.GetTailNumber())) {
             runway.ClearRunway();
 
@@ -96,13 +127,20 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
         }
     }
 
+    /**
+     * Takes the most urgent aircraft from the queue and performs the specified
+     * request, such as clearing the runway and giving clearance to a new
+     * aircraft.
+     * 
+     * @throws RemoteException
+     */
     private void WorkOnQueue() throws RemoteException {
 
         if (runway.Occupied()) {
             return;
         }
 
-        AircraftRequest nextReq = PollNext();
+        AircraftRequest nextReq = PopNext();
 
         if (nextReq == null) {
             return;
@@ -111,7 +149,14 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
         GrantClearence(nextReq);
     }
 
-    private AircraftRequest PollNext() throws RemoteException {
+    /**
+     * Pops the next request to handle. It prioritizes the emergency queue before
+     * moving on to the normal queue.
+     * 
+     * @return
+     * @throws RemoteException
+     */
+    private AircraftRequest PopNext() throws RemoteException {
 
         if (!emergencyQueue.isEmpty()) {
             AircraftRequest req = emergencyQueue.entrySet().iterator().next().getValue();
@@ -130,11 +175,20 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
         return null;
     }
 
+    /**
+     * Sends a clearance message to the specified aircraft. Also updates the status
+     * table for printing.
+     * 
+     * @param req
+     * @throws RemoteException
+     */
     private void GrantClearence(AircraftRequest req) throws RemoteException {
+        // Lock the runway for this aircraft.
         runway.SetCurrentAircraft(req.GetAircraft());
 
         String tailNumber = req.GetAircraft().GetTailNumber();
-
+        
+        // Update the status table.
         try {
             if (req.GetRequest() == Request.LANDING) {
                 aircraftStatus.put(tailNumber, "LANDING");
@@ -150,6 +204,9 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
         }
     }
 
+    /**
+     * Prints all statuses in the aircraft table.
+     */
     private void PrintTable() {
         ClearConsole();
 
@@ -174,8 +231,7 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
                     "| %-14s | %-10s | %-20s |%n",
                     tailNumber,
                     fuelLeft,
-                    status
-            );
+                    status);
         }
 
         System.out.println("+----------------+------------+----------------------+");
@@ -194,6 +250,11 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
         }
     }
 
+    /**
+     * Prints a list of all aircraft in the specified queue in brackets.
+     * @param queue
+     * @return
+     */
     private String QueueToString(LinkedHashMap<String, AircraftRequest> queue) {
         if (queue.isEmpty()) {
             return "[]";
@@ -215,6 +276,9 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
         return builder.toString();
     }
 
+    /**
+     * Helper for clearing the console, used only for visuals.
+     */
     private void ClearConsole() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
