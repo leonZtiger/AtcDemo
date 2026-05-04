@@ -35,7 +35,7 @@ public class Atc extends UnicastRemoteObject implements AtcRemote {
      * @throws RemoteException
      */
     public Atc() throws RemoteException {
-        super();
+        super(6768);
 
         runway = new Runway();
         normalQueue = new LinkedHashMap<>();
