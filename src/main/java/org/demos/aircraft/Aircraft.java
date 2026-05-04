@@ -20,7 +20,7 @@ public class Aircraft extends UnicastRemoteObject implements AircraftRemote {
     private final AtomicBoolean holdingPatternActive;
 
     public Aircraft(String tailNumber, float fuel, float consumption, AtcRemote atc) throws RemoteException {
-        super();
+        super(6768);
         this.tailNumber = tailNumber;
         this.fuel = fuel;
         this.consumption = consumption;
