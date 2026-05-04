@@ -14,7 +14,7 @@ public class AtcNode {
             
             Atc atc = new Atc();
 
-            Registry registry = LocateRegistry.createRegistry(1099);
+            Registry registry = LocateRegistry.createRegistry(6767);
 
             registry.rebind("ATC", atc);
 

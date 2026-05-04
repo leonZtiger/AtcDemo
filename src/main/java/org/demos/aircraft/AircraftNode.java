@@ -15,7 +15,7 @@ public class AircraftNode {
         AtcRemote atc;
 
         try {
-            Registry registry = LocateRegistry.getRegistry("localhost", 1099);
+            Registry registry = LocateRegistry.getRegistry("129.151.194.14", 6767);
             atc = (AtcRemote) registry.lookup("ATC");
         } catch (Exception e) {
             System.err.println(e.getMessage());
